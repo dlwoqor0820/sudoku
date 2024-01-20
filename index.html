@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="kor">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku!</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: antiquewhite;
+        }
+        .board {
+            align-items: center;
+            align-content: center;
+            justify-content: center;
+            border: black solid 4px;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: repeat(9, 52px);
+            justify-items: center;
+        }
+        .tile {
+            font-size: 30px;
+            text-align: center;
+            background-color: rgb(255, 255, 255);
+            height: 50px;
+            width: 50px;
+            border: black solid 1px;
+        }
+        .tile:hover{
+            background-color: rgb(165, 165, 165);
+        }
+        .answer {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+        }
+        .answerNumber {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            gap: 8px;
+            width: 50px;
+            height: 50px;
+            border: black solid 3px;
+            border-radius: 6px;
+            background-color:azure;
+            margin-top: 100px;
+        }
+        .levels {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            width: 300px;
+            height: 50px;
+            margin-top: 50px;
+        }
+        .level {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 50px;
+            border-radius: 20px;
+            border: rgb(161, 161, 161) solid 2px;
+            background-color: rgb(255, 223, 118);
+        }
+        .hidden {
+            display: none;
+        }
+        #\32  {
+            border-bottom: black solid 3px;
+        }
+        #\35  {
+            border-bottom: black solid 3px;
+        }
+        #\30 \:2 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\31 \:2 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\32 \:2 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\33 \:2 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\34 \:2 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\35 \:2 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\36 \:2 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\37 \:2 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\38 \:2 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+
+        #\30 \:5 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\31 \:5 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\32 \:5 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\33 \:5 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\34 \:5 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\35 \:5 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\36 \:5 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\37 \:5 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+        #\38 \:5 {
+            border-left: black solid 2px;
+            border-right: black solid 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sudoku!</h1>
+    <div class = 'board hidden'></div>
+    <div class = 'answer hidden'></div>
+    <div class = 'levels'>
+        <span class = 'level' id = 'easy'>EASY</span>
+        <span class = 'level' id = 'normal'>NORMAL</span>
+        <span class = 'level' id = 'hard'>HARD</span>
+    </div>
+
+    <script>
+
+        const body = document.querySelector("body");
+        const board = document.querySelector(".board");
+        const answer = document.querySelector(".answer");
+        const levels = document.querySelector(".levels");
+
+
+
+        //0으로 이루어진 9x9 보드
+        const createDefaultBoard = () => {
+            let box = [];
+            for (let i=0; i<9; i++) {
+                let row = [];
+                for (let j=0; j<9; j++) {
+                    row.push(0);
+                };
+                box.push(row);
+            };
+            return box;
+        };
+
+
+
+        const BaseBoard_EASY = [
+            [6, 9, 8, 1, 3, 4, 5, 7, 2],
+            [2, 3, 7, 6, 8, 5, 4, 1, 9],
+            [1, 5, 4, 9, 7, 2, 3, 8, 6],
+            [4, 8, 2, 7, 1, 9, 6, 3, 5],
+            [7, 6, 9, 5, 4, 3, 1, 2, 8],
+            [5, 1, 3, 2, 6, 8, 9 ,4 ,7],
+            [9, 2, 1, 4, 5, 7, 8, 6, 3],
+            [8, 4, 5, 3, 2, 6, 7, 9, 1],
+            [3, 7, 6, 8, 9, 1, 2, 5, 4]
+        ];
+
+        const QuestionBoard_EASY = [
+            [6, "ㅤ", "ㅤ", "ㅤ", 3, 4, "ㅤ", 7, "ㅤ"],
+            [2, "ㅤ", "ㅤ", "ㅤ", 8, "ㅤ", "ㅤ", 1 ,9],
+            [1, 5, "ㅤ", "ㅤ", 7, "ㅤ", "ㅤ", 8, "ㅤ"],
+            [4, "ㅤ", 2, 7, 1, "ㅤ", 6, "ㅤ", "ㅤ", ],
+            ["ㅤ", 6, "ㅤ", 5, "ㅤ", "ㅤ", "ㅤ", 2, "ㅤ"],
+            ["ㅤ", "ㅤ", 3, "ㅤ", "ㅤ", 8, 9, "ㅤ", 7],
+            ["ㅤ", 2, "ㅤ", "ㅤ", 5, "ㅤ", "ㅤ", 6, 3],
+            [8, 4, "ㅤ", "ㅤ", 2, "ㅤ", "ㅤ", "ㅤ", 1],
+            ["ㅤ", 7, "ㅤ", 8, 9, "ㅤ", "ㅤ", "ㅤ", 4]
+        ];
+
+
+
+        const BaseBoard_NORMAL = [
+            [5, 1, 6, 4, 8, 2, 7, 9, 3],
+            [9, 2, 3, 6, 1, 7, 4, 8, 5],
+            [7, 8, 4, 5, 3, 9, 2, 1, 6],
+            [3, 9, 1, 7, 2, 5, 6, 4, 8],
+            [6, 5, 2, 1, 4, 8, 3, 7, 9],
+            [4, 7, 8, 9, 6, 3, 1, 5, 2],
+            [2, 3, 9, 8, 7, 1, 5, 6, 4],
+            [1, 6, 5, 2, 9, 4, 8, 3, 7],
+            [8, 4, 7, 3, 5, 6, 9, 2, 1]
+        ];
+
+        const QuestionBoard_NORMAL = [
+            ["ㅤ", "ㅤ", 6, "ㅤ", "ㅤ", 2, "ㅤ", "ㅤ", "ㅤ", ],
+            ["ㅤ", "ㅤ", "ㅤ", "ㅤ", 1, "ㅤ", "ㅤ", 8, 5],
+            [7, "ㅤ", 4, 5, 3, "ㅤ", "ㅤ", "ㅤ", 6],
+            [3, 9, "ㅤ", "ㅤ", "ㅤ", "ㅤ", 6, 4, "ㅤ"],
+            ["ㅤ", 5, "ㅤ", "ㅤ", 4, "ㅤ", "ㅤ", 7, "ㅤ", ],
+            ["ㅤ", 7, 8, "ㅤ", "ㅤ", "ㅤ", "ㅤ", 5, 2],
+            [2, "ㅤ", "ㅤ", "ㅤ", 7, 1, 5, "ㅤ", 4],
+            [1, 6, "ㅤ", "ㅤ", 9, "ㅤ", "ㅤ", "ㅤ", "ㅤ"],
+            ["ㅤ", "ㅤ", "ㅤ", 3, "ㅤ", "ㅤ", 9, "ㅤ", "ㅤ", ]
+        ];
+
+
+
+
+        const BaseBoard_HARD = [
+            [7, 3, 6, 5, 8, 2, 9, 4, 1],
+            [8, 5, 9, 1, 4, 7, 6, 3, 2],
+            [2, 4, 1, 9, 3, 6, 7, 8, 5],
+            [1, 2, 3, 4, 6, 9, 8, 5, 7],
+            [5, 6, 7, 8, 1, 3, 4, 2, 9],
+            [4, 9, 8, 2, 7, 5, 3, 1, 6],
+            [6, 1, 2, 3, 9, 4, 5, 7, 8],
+            [9, 8, 4, 7, 5, 1, 2, 6, 3],
+            [3, 7, 5, 6, 2, 8, 1, 9, 4]
+        ];
+
+        const QuestionBoard_HARD = [
+            ["ㅤ", "ㅤ", "ㅤ", "ㅤ", "ㅤ", 2, "ㅤ", 4, "ㅤ"],
+            ["ㅤ", 5, 9, "ㅤ", "ㅤ", 7, "ㅤ", "ㅤ", "ㅤ"],
+            ["ㅤ", "ㅤ", 1, 9, 3, "ㅤ", "ㅤ", "ㅤ", "ㅤ"],
+            ["ㅤ", "ㅤ", 3, 4, "ㅤ", "ㅤ", "ㅤ", "ㅤ", 7],
+            [5, 6, "ㅤ", "ㅤ", "ㅤ", "ㅤ", "ㅤ", 2, 9],
+            [4, "ㅤ", "ㅤ", "ㅤ", "ㅤ", 5, 3, "ㅤ", "ㅤ"],
+            ["ㅤ", "ㅤ", "ㅤ", "ㅤ", 9, 4, 5, "ㅤ", "ㅤ"],
+            ["ㅤ", "ㅤ", "ㅤ", 7, "ㅤ", "ㅤ", 2, 6, "ㅤ"],
+            ["ㅤ", 7, "ㅤ", 6, "ㅤ", "ㅤ", "ㅤ", "ㅤ", "ㅤ"],
+        ];
+
+
+
+        let ratio = 0;
+        let selectedLevel = 0;
+        let shuffledBaseBoard = [];
+        let shuffledQuestionBoard = [];
+        const boardLength = createDefaultBoard().length;
+
+
+        const creatRandomTwoNumbers = (num) => {
+            let isSame = 0;
+
+            while (isSame == false) {
+                firstRandomNumber = Math.floor(Math.random() * num);
+                secondRandomNumber = Math.floor(Math.random() * num);
+                if (firstRandomNumber !== secondRandomNumber) {
+                    isSame = true;
+                } else {
+                    isSame = false;
+                };
+            };
+
+            return [firstRandomNumber, secondRandomNumber];
+        }
+
+        let randomNumberWith3 = creatRandomTwoNumbers(3);
+        firstRandomNumberWith3 = randomNumberWith3[0];
+        secondRandomNumberWith3 = randomNumberWith3[1];
+
+        let randomNumberWith10 = [];
+
+        do {
+            randomNumberWith10 = creatRandomTwoNumbers(10);
+            firstRandomNumberWith10 = randomNumberWith10[0];
+            secondRandomNumberWith10 = randomNumberWith10[1];
+        } while (firstRandomNumberWith10 == 0 || secondRandomNumberWith10 == 0);
+
+
+
+        const flipUpDown = (eachBoard) => {
+            let blocks = [];
+            for (let i=0; i<boardLength; i++) {
+                let tempBox = [];
+                k = boardLength - 1 - i
+                for (let j=0; j<boardLength; j++) {
+                    tempBox.push(eachBoard[k][j])
+                };
+                blocks.push(tempBox)
+            };
+            if (ratio == 0) {
+                shuffledBaseBoard = [];
+                shuffledBaseBoard.push(...blocks);
+            } else if (ratio == 1) {
+                shuffledQuestionBoard = [];
+                shuffledQuestionBoard.push(...blocks);
+            };
+        };
+
+        const flipLeftRigth = (eachBoard) => {
+            let blocks = [];
+            for (let i=0; i<boardLength; i++) {
+                let tempBox = [];
+                for (let j=0; j<boardLength; j++) {
+                    k = boardLength - 1 - j
+                    tempBox.push(eachBoard[i][k])
+                };
+                blocks.push(tempBox)
+            };
+            if (ratio == 0) {
+                shuffledBaseBoard = [];
+                shuffledBaseBoard.push(...blocks);
+            } else if (ratio == 1) {
+                shuffledQuestionBoard = [];
+                shuffledQuestionBoard.push(...blocks);
+            };
+        };
+
+        // ' \ ' 방향 기준 선대칭
+        const linearSymmetry = (eachBoard) => {
+            let rowBlockContainer = [];
+            for (let i=0; i<boardLength; i++) {
+                let temporaryContainer = [];
+                for (let j=0; j<boardLength; j++) {
+                    temporaryContainer.push(eachBoard[j][i])
+                };
+                rowBlockContainer.push(temporaryContainer);
+            };
+            
+            if (ratio == 0) {
+                shuffledBaseBoard = [];
+                shuffledBaseBoard.push([...rowBlockContainer]);
+            } else if (ratio == 1) {
+                shuffledQuestionBoard = [];
+                shuffledQuestionBoard.push([...rowBlockContainer]);
+            };
+
+        };
+
+        const rowShuffle = (eachBoard) => { 
+            [eachBoard] = [...eachBoard];
+            block_1 = [eachBoard[0], eachBoard[1], eachBoard[2]];
+            block_2 = [eachBoard[3], eachBoard[4], eachBoard[5]];
+            block_3 = [eachBoard[6], eachBoard[7], eachBoard[8]];
+            block_1[firstRandomNumberWith3] = block_1.splice(secondRandomNumberWith3, 1, block_1[firstRandomNumberWith3])[0];
+            block_2[firstRandomNumberWith3] = block_2.splice(secondRandomNumberWith3, 1, block_2[firstRandomNumberWith3])[0];
+            block_3[firstRandomNumberWith3] = block_3.splice(secondRandomNumberWith3, 1, block_3[firstRandomNumberWith3])[0];
+
+            if (ratio == 0) {
+                shuffledBaseBoard = [];
+                shuffledBaseBoard.push(...block_1, ...block_2, ...block_3);
+            } else if (ratio == 1) {
+                shuffledQuestionBoard = [];
+                shuffledQuestionBoard.push(...block_1, ...block_2, ...block_3);
+            };
+        };
+
+        const columnShuffle = (eachBoard) => { 
+            //console.log(eachBoard)
+            //Rotate 90 degrees to the right 
+            //오른쪽으로 90도 회전
+            let newBoard = createDefaultBoard();
+            for (let i=0; i<boardLength; i++) {
+                for (let j=0; j<boardLength; j++) {
+                    convRow = j;
+                    convCol = boardLength - 1 - i;
+                    newBoard[convRow][convCol] = eachBoard[i][j];
+                };
+            };
+            //3행씩 3블럭 독립시행으로 셔플
+            block_1 = [newBoard[0], newBoard[1], newBoard[2]];
+            block_2 = [newBoard[3], newBoard[4], newBoard[5]];
+            block_3 = [newBoard[6], newBoard[7], newBoard[8]];
+            block_1[firstRandomNumberWith3] = block_1.splice(secondRandomNumberWith3, 1, block_1[firstRandomNumberWith3])[0];
+            block_2[firstRandomNumberWith3] = block_2.splice(secondRandomNumberWith3, 1, block_2[firstRandomNumberWith3])[0];
+            block_3[firstRandomNumberWith3] = block_3.splice(secondRandomNumberWith3, 1, block_3[firstRandomNumberWith3])[0];
+            
+            //combine
+            let beforeChangeAngle = [];
+            beforeChangeAngle.push(...block_1, ...block_2, ...block_3);
+
+            //Rotate 90 degrees to the left 
+            //왼쪽으로 90도 회전
+            let afterChangeAngle = createDefaultBoard();
+            //console.log(afterChangeAngle) //왜 0배열로 안바뀌지????
+            for (let i=0; i<boardLength; i++) {
+                for (let j=0; j<boardLength; j++) {
+                    convRow = boardLength - 1 - j;
+                    convCol = i;
+                    afterChangeAngle[convRow][convCol] = beforeChangeAngle[i][j];
+                };
+            };
+
+            if (ratio == 0) {
+                shuffledBaseBoard = [];
+                shuffledBaseBoard.push(...afterChangeAngle);
+            } else if (ratio == 1) {
+                shuffledQuestionBoard = [];
+                shuffledQuestionBoard.push(...afterChangeAngle);
+            };
+        };
+
+        const numberShuffle = (eachBoard) => {
+            [eachBoard] = [...eachBoard]
+            numberContainer = [];
+            eachBoard.forEach((line) => {
+                //console.log(line)
+                temporaryNumberContainer = [];
+
+                for (let i=0; i<boardLength; i++) {
+                    lineNum = 0;
+                    lineNum = line[i]
+                    if (line[i] == firstRandomNumberWith10) {
+                        lineNum = 0;
+                    };
+                    if (line[i] == secondRandomNumberWith10) {
+                        lineNum = firstRandomNumberWith10;
+                    };
+                    if (lineNum == 0) {
+                        lineNum = secondRandomNumberWith10;
+                    };
+                    temporaryNumberContainer.push(lineNum);
+                };
+                numberContainer.push(temporaryNumberContainer);
+            });
+
+            if (ratio == 0) {
+                shuffledBaseBoard = [];
+                shuffledBaseBoard.push(numberContainer);
+            } else if (ratio == 1) {
+                shuffledQuestionBoard = [];
+                shuffledQuestionBoard.push(numberContainer);
+            }
+        };
+
+
+
+        const shuffle = (baseBoard) => {
+            baseBoard.forEach ((eachBoard) => {
+                if (ratio == 0) {
+                    if (shuffledBaseBoard == '') {
+                        shuffledBaseBoard = eachBoard;
+                    };
+                    linearSymmetry(shuffledBaseBoard);
+                    numberShuffle(shuffledBaseBoard);
+                    rowShuffle(shuffledBaseBoard);
+                    columnShuffle(shuffledBaseBoard);
+                    if (firstRandomNumberWith10%2 == 0) {
+                        flipUpDown(shuffledBaseBoard)
+                    } else {
+                        flipLeftRigth(shuffledBaseBoard)
+                    }
+
+                } else if (ratio == 1) {
+                    if (shuffledQuestionBoard == '') {
+                        shuffledQuestionBoard = eachBoard;
+                    };
+                    linearSymmetry(shuffledQuestionBoard);
+                    numberShuffle(shuffledQuestionBoard);
+                    rowShuffle(shuffledQuestionBoard);
+                    columnShuffle(shuffledQuestionBoard);
+                    if (firstRandomNumberWith10%2 == 0) {
+                        flipUpDown(shuffledQuestionBoard)
+                    } else {
+                        flipLeftRigth(shuffledQuestionBoard)
+                    }
+                };
+
+                ratio++
+            })
+        };
+
+        const createBoard = () => {
+            for (let i=0; i<boardLength; i++) {
+                const row = document.createElement("div");
+                row.classList = "row";
+                row.id = `${i}`;
+                board.appendChild(row);
+                const thisBlock = document.getElementById(i);
+                for (let j=0; j<boardLength; j++) {
+                    const tile = document.createElement("span");
+                    tile.classList = "tile";
+                    tile.id = `${i}:${j}`;
+                    if (typeof(shuffledQuestionBoard[i][j]) == typeof(1)) {
+                        tile.classList.add("symantic");
+                    }
+                    thisBlock.appendChild(tile);
+                    tile.innerText = shuffledQuestionBoard[i][j];
+                };
+            };
+            board.classList.toggle('hidden')
+        };
+
+        const createAnswerTile = () => {
+            for (let i=1; i<10; i++) {
+                const answerNumber = document.createElement("span");
+                answerNumber.classList = "answerNumber";
+                answerNumber.innerText = `${i}`;
+                answer.appendChild(answerNumber);
+                answer.classList.toggle('hidden')
+            };
+        };
+
+        const init = (baseBoard) => {
+            shuffle(baseBoard);
+            createBoard();
+            createAnswerTile();
+        }
+
+        const checkIsCorrect = (answerValue, selectedTile) => {
+            
+            idOfSelectedTile = selectedTile.id.split(':');
+            rowTileId = parseInt(idOfSelectedTile[0]);
+            columnTileId = parseInt(idOfSelectedTile[1]);
+            if (shuffledBaseBoard[rowTileId][columnTileId] == answerValue) {
+                isCorrect = true;
+            } else {
+                isCorrect = false;
+            };
+        };
+
+
+
+
+        let isCorrect = 0;
+        let checkedTile = '';
+
+        board.addEventListener("click", (e) => {
+            if (e.target.classList != "tile" || e.target.classList == "symantic") {
+                return;
+            };
+            if (checkedTile !== '') {
+                previouslySelectedTile = document.getElementById(checkedTile);
+                previouslySelectedTile.style.backgroundColor = "white";
+            };
+            checkedTile = e.target.id;
+            e.target.style.backgroundColor = "grey";
+        });
+
+        answer.addEventListener("click", (e) => {
+            if (e.target.classList != "answerNumber" || checkedTile == '') {
+                return;
+            };
+            selectedTile = document.getElementById(checkedTile);
+            answerValue = e.target.innerText;
+            checkIsCorrect(answerValue, selectedTile);
+            if (isCorrect == true) {
+                selectedTile.innerText = answerValue
+                selectedTile.style.backgroundColor = "white";
+            } else {
+                selectedTile.style.backgroundColor = "red";
+                setTimeout(() => selectedTile.style.backgroundColor = "white", 500);
+                checkedTile = '';
+            };
+        });
+
+        levels.addEventListener("click", (e) => {
+            let baseBoard = []
+            selectedLevel = e.target.id;
+            switch (selectedLevel) {
+                case "easy" :
+                    baseBoard = [BaseBoard_EASY, QuestionBoard_EASY];
+                    break;
+                case "normal" :
+                    baseBoard = [BaseBoard_NORMAL, QuestionBoard_NORMAL];
+                    break;
+                case "hard" :
+                    baseBoard = [BaseBoard_HARD, QuestionBoard_HARD];
+                    break;
+                case "" :
+                    return;
+            };
+            init(baseBoard);
+            levels.classList.toggle('hidden')
+        });
+
+    </script>
+</body>
+</html>
